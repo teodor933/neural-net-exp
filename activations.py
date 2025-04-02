@@ -7,7 +7,7 @@ class Linear: # Regression
 
     @staticmethod
     def derivative(x):
-        return 1
+        return np.ones_like(x)
 
 class ReLU:
     @staticmethod
@@ -27,6 +27,16 @@ class LeakyReLU:
 
     def derivative(self, x):
         return np.where(x > 0, 1, self.alpha)
+
+class Tanh:
+    @staticmethod
+    def execute(x):
+        return np.tanh(x)
+
+    @staticmethod
+    def derivative(x):
+        return 1 - np.tanh(x) ** 2
+
 
 class Softmax: # Classification
     @staticmethod

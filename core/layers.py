@@ -1,8 +1,13 @@
 import numpy as np
 
+from core.activations import LeakyReLU
+
+
 class Layer:
-    def __init__(self, input_size, output_size, activation):
-        self.weights = np.random.randn(output_size, input_size) * 0.01
+    def __init__(self, input_size, output_size, activation, weight_initialiser=None):
+        self.weight_initialiser = weight_initialiser or getattr(activation, "weight_initialiser")
+
+        self.weights = self.weight_initialiser(input_size, output_size)
         self.biases = np.zeros((output_size, 1))
         self.activation = activation
 
@@ -20,8 +25,8 @@ class Layer:
 
     def backward(self, d_loss):
         d_z = d_loss * self.activation.derivative(self.z) # dL/dz = dL/da * da/dz
-        self.d_weights = np.dot(d_z, self.inputs.T) / self.inputs.shape[1] # dL/dW = dL/dz * dz/dW
-        self.d_biases = np.mean(d_z, axis=1, keepdims=True) # axis for rows instead
+        self.d_weights = np.dot(d_z, self.inputs.T) # dL/dW = dL/dz * dz/dW
+        self.d_biases = np.sum(d_z, axis=1, keepdims=True) # axis for rows instead
         d_inputs = np.dot(self.weights.T, d_z) # dL/dx = dL/dz * dz/dx
         return d_inputs, self.d_weights, self.d_biases
 

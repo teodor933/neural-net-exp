@@ -1,0 +1,15 @@
+DONE: activation specific init: each layer can define its weight initialiser
+DONE : define abstract classes for Activation, Loss, Optimiser
+- custom weight init: allow to input in custom weight initialisers
+- check for correct shape in network.forward() method
+
+Optimisers:
+- Adam
+- RMSprop
+- SGD with momentum
+
+- some form of LayerNorm, BatchNorm
+- lr scheduling
+- model saving and loading
+- keybind to stop and save training
+- metric tracking

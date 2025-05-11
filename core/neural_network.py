@@ -7,9 +7,11 @@ class NeuralNetwork:
         self.input_size = input_size
         self.layers = []
 
-    def add_layer(self, size, activation):
+    def add_layer(self, size, activation, weight_initialiser=None):
         input_size = self.input_size if not self.layers else self.layers[-1].weights.shape[0]
-        self.layers.append(Layer(input_size, size, activation))
+        self.layers.append(
+            Layer(input_size, size, activation, weight_initialiser)
+        )
 
     def forward(self, x):
         if x.shape[0] != self.input_size:

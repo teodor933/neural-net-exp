@@ -24,6 +24,14 @@ class NeuralNetwork:
             activations.append(x)
         return x, activations
 
+    def predict(self, x):
+        if x.shape[0] != self.input_size:
+            x = x.reshape(self.input_size, -1)
+
+        for layer in self.layers:
+            x = layer.forward(x)
+        return x
+
     def compute_loss(self, x, y_true, loss_fn):
         y_pred, _ = self.forward(x)
         return loss_fn.execute(y_pred, y_true)

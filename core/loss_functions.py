@@ -16,7 +16,8 @@ class MSELoss(Loss): # Regression
         return np.mean((y_pred - y_true) ** 2)
 
     def derivative(self, y_pred, y_true):
-        return (2 / y_true.shape[1]) * (y_pred - y_true) # features * samples to get proper mean if you ever ask why division by n
+        n = np.prod(y_true.shape)
+        return (2 / n) * (y_pred - y_true) # features * samples to get proper mean if you ever ask why division by n
 
 class CrossEntropyLoss(Loss): # Classification, y_true should be one-hot encoded
     def execute(self, y_pred, y_true):

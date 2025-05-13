@@ -10,6 +10,8 @@ from core.initialisers import HeNormal, Normal
 import matplotlib.pyplot as plt
 
 def main():
+    np.random.seed(123)
+    
     x_batch = np.random.uniform(-6, 6, (1, 1000))  # (1, 1000)
     y_batch = np.sin(x_batch)
 

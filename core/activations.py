@@ -34,8 +34,6 @@ class ReLU(Activation):
         return np.where(x > 0, 1, 0)
 
 class LeakyReLU(Activation):
-    weight_initialiser = HeNormal()
-
     def __init__(self, alpha=0.01):
         self.alpha = alpha
         self.weight_initialiser = HeNormal()

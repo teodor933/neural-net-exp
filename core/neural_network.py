@@ -1,19 +1,29 @@
 import numpy as np
+from typing import Optional, Tuple, List
 
+from core.activations import Activation
+from core.initialisers import Initialiser
 from core.layers import Layer
+from core.loss_functions import Loss
+from core.optimisers import Optimiser
+
 
 class NeuralNetwork:
-    def __init__(self, input_size):
+    def __init__(self, input_size: int) -> None:
         self.input_size = input_size
         self.layers = []
 
-    def add_layer(self, size, activation, weight_initialiser=None):
+    def add_layer(self,
+                  size: int,
+                  activation: Activation,
+                  weight_initialiser: Optional[Initialiser] = None
+                  ) -> None:
         input_size = self.input_size if not self.layers else self.layers[-1].weights.shape[0]
         self.layers.append(
             Layer(input_size, size, activation, weight_initialiser)
         )
 
-    def forward(self, x):
+    def forward(self, x: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray]]:
         if x.shape[0] != self.input_size:
             x = x.reshape(self.input_size, -1)
 
@@ -24,7 +34,7 @@ class NeuralNetwork:
             activations.append(x)
         return x, activations
 
-    def predict(self, x):
+    def predict(self, x: np.ndarray) -> np.ndarray:
         if x.shape[0] != self.input_size:
             x = x.reshape(self.input_size, -1)
 
@@ -32,11 +42,11 @@ class NeuralNetwork:
             x = layer.forward(x)
         return x
 
-    def compute_loss(self, x, y_true, loss_fn):
+    def compute_loss(self, x: np.ndarray, y_true: np.ndarray, loss_fn: Loss) -> float:
         y_pred, _ = self.forward(x)
         return loss_fn.execute(y_pred, y_true)
 
-    def backpropagate(self, d_loss, optimiser):
+    def backpropagate(self, d_loss: np.ndarray, optimiser: Optimiser) -> np.ndarray:
         for layer in reversed(self.layers):
             d_loss, _, _ = layer.backward(d_loss) # derivatives
             layer.update(optimiser) # alter weights according to derivatives

@@ -1,13 +1,23 @@
 import numpy as np
 
+from core.neural_network import NeuralNetwork
+from core.loss_functions import Loss
+from core.optimisers import Optimiser
+
+
 class Learner:
-    def __init__(self, model, loss_fn, optimiser, batch_size=1):
+    def __init__(self,
+                 model: NeuralNetwork,
+                 loss_fn: Loss,
+                 optimiser: Optimiser,
+                 batch_size: int = 1
+                 ) -> None:
         self.model = model
         self.loss_fn = loss_fn
         self.optimiser = optimiser
         self.batch_size = batch_size
 
-    def learn_step(self, input_batch, output_batch):
+    def learn_step(self, input_batch: np.ndarray, output_batch: np.ndarray) -> float:
         pred, _ = self.model.forward(input_batch) # get model output
 
         loss = self.loss_fn.execute(pred, output_batch) # get loss
@@ -17,8 +27,12 @@ class Learner:
 
         return loss # other use cases
 
-    def learn(self, input_batch, output_batch, epochs,
-              verbose=True):
+    def learn(self,
+              input_batch: np.ndarray,
+              output_batch: np.ndarray,
+              epochs: int,
+              verbose: bool = True
+              ) -> "Learner":
         num_samples = input_batch.shape[1]
         for epoch in range(epochs):
             # shuffle and randomise the data to be used, helps with overfitting

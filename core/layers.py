@@ -31,5 +31,5 @@ class Layer:
         return d_inputs, self.d_weights, self.d_biases
 
     def update(self, optimiser):
-        self.weights, self.biases = optimiser.update(self.weights, self.biases,
-                                                     self.d_weights, self.d_biases)
+        optimiser.update(self.weights, self.biases,
+                         self.d_weights, self.d_biases)

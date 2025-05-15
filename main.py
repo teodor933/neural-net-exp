@@ -25,7 +25,7 @@ def main():
     x_mean, x_std = np.mean(x_batch), np.std(x_batch)
     x_batch = (x_batch - x_mean) / x_std  # standard normal distribution z-score
 
-    optimiser = SGD(learning_rate=learning_rate)
+    optimiser = SGDM(learning_rate=learning_rate, gamma=0.9)
     learner = Learner(model=nn,
                       loss_fn=MSELoss(),
                       optimiser=optimiser,

@@ -21,31 +21,65 @@ class SGD(Optimiser):
 
 
 class SGDM(Optimiser):
-    def __init__(self, learning_rate: float = 1e-4, gamma=0.9):
-        self.lr = learning_rate
+    def __init__(self, learning_rate: float = 1e-4, gamma: float = 0.9):
+        """
+        Initialize the SGD with Momentum (SGDM) optimiser.
 
+        Parameters:
+            learning_rate (float): Step size for each parameter update (η).
+            gamma (float): Momentum factor (γ), typically in the range [0.9, 0.99].
+
+        The optimiser maintains per-layer "velocity" buffers (v_w and v_b)
+        which accumulate gradients over time, weighted by the momentum factor.
+        This helps accelerate learning in consistent gradient directions and
+        reduces oscillation in noisy or curved loss surfaces.
+        """
+        self.lr = learning_rate
         self.gamma = gamma
+
         self.v_w = {}
         self.v_b = {}
 
     def update(self, weights: np.ndarray, biases: np.ndarray,
                dW: np.ndarray, db: np.ndarray):
         """
-        vt = γv_t−1 + η∇θJ(θ)
-        θ = θ − vt
+        Performs a momentum-based parameter update.
+
+        Parameters:
+            weights (np.ndarray): Current weight matrix of a layer (θ_w).
+            biases (np.ndarray): Current bias vector of a layer (θ_b).
+            dW (np.ndarray): Gradient of the loss w.r.t. weights (∇J(θ_w)).
+            db (np.ndarray): Gradient of the loss w.r.t. biases (∇J(θ_b)).
+
+        This method updates weights and biases using momentum:
+
+            v_t = (γ * v_{t-1}) + (η * ∇J(θ))
+            θ = θ - v_t
+
+        Where:
+            - v_t is the current "velocity" (accumulated gradient),
+            - γ is the momentum factor,
+            - η is the learning rate.
         """
-        # weights_id = id(weights)
-        # if weights_id not in self.v_w:
-        #     self.v_w[weights_id] = np.zeros_like(weights)
-        # ??? Optimiser does not work, weights and biases are not tracked per layer...
+        weights_id = id(weights)
+        biases_id = id(biases)
 
+        if weights_id not in self.v_w:
+            self.v_w[weights_id] = np.zeros_like(weights)
+            self.v_b[biases_id] = np.zeros_like(biases)
 
-        if self.v_w is None or self.v_b is None:
-            self.v_w = np.zeros_like(weights)
-            self.v_b = np.zeros_like(biases)
-
-        self.v_w = self.gamma * self.v_w + self.lr * dW 
-        self.v_b = self.gamma * self.v_b + self.lr * db
+        # [:] for mutating the existing array instead of rebinding, updating data in place
+        self.v_w[weights_id][:] = self.gamma * self.v_w[weights_id] + self.lr * dW
+        self.v_b[biases_id][:] = self.gamma * self.v_b[biases_id] + self.lr * db
         
-        weights -= self.v_w
-        biases -= self.v_b
+        weights -= self.v_w[weights_id]
+        biases -= self.v_b[biases_id]
+
+
+class RMSProp(Optimiser):
+    def __init__(self):
+        pass
+
+    def update(self, weights: np.ndarray, biases: np.ndarray,
+               dW: np.ndarray, db: np.ndarray):
+        pass

@@ -5,7 +5,6 @@ from core.activations import Activation
 from core.initialisers import Initialiser
 from core.layers import Layer
 from core.loss_functions import Loss
-from core.optimisers import Optimiser
 
 
 class NeuralNetwork:
@@ -46,8 +45,11 @@ class NeuralNetwork:
         y_pred, _ = self.forward(x)
         return loss_fn.execute(y_pred, y_true)
 
-    def backpropagate(self, d_loss: np.ndarray, optimiser: Optimiser) -> np.ndarray:
+    def get_parameters(self):
+        for layer in self.layers:
+            yield layer.weights, layer.biases, layer.d_weights, layer.d_biases
+
+    def backpropagation(self, d_loss: np.ndarray) -> np.ndarray:
         for layer in reversed(self.layers):
             d_loss, _, _ = layer.backward(d_loss) # derivatives
-            layer.update(optimiser) # alter weights according to derivatives
         return d_loss # just in case

@@ -15,23 +15,24 @@ def main():
     x_batch = np.random.uniform(-10, 10, (1, 1000))  # (1, 1000)
     y_batch = np.sin(x_batch)
 
-    learning_rate = 0.005
+    x_mean, x_std = np.mean(x_batch), np.std(x_batch)
+    x_batch = ((x_batch - x_mean) / x_std)  # standard normal distribution z-score
+    y_batch = y_batch
 
-    nn = NeuralNetwork(input_size=x_batch.shape[0])
-    nn.add_layer(64, LeakyReLU(alpha=0.01), weight_initialiser=HeNormal()) # LeakyReLU(alpha=0.01)
+    nn = NeuralNetwork(input_size=1)
     nn.add_layer(32, LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())
+    nn.add_layer(16, LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())
     nn.add_layer(1, Linear())
 
-    x_mean, x_std = np.mean(x_batch), np.std(x_batch)
-    x_batch = (x_batch - x_mean) / x_std  # standard normal distribution z-score
+    learning_rate = 0.005
 
     optimiser = SGDM(learning_rate=learning_rate, gamma=0.9)
     learner = Learner(model=nn,
                       loss_fn=MSELoss(),
                       optimiser=optimiser,
-                      batch_size=32)
+                      batch_size=50)
 
-    epochs = 10001
+    epochs = 4000
 
     training_loss = learner.learn(x_batch, y_batch,
                                   epochs=epochs,
@@ -54,5 +55,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 

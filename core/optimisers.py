@@ -1,23 +1,21 @@
-from typing import Optional
-
 import numpy as np
 from abc import ABC, abstractmethod
 
 
 class Optimiser(ABC):
     @abstractmethod
-    def update(self, weights: np.ndarray, biases: np.ndarray,
-               dW: np.ndarray, db: np.ndarray):
+    def step(self, parameters):
         raise NotImplementedError
 
 class SGD(Optimiser):
     def __init__(self, learning_rate: float = 1e-4):
         self.lr = learning_rate
 
-    def update(self, weights: np.ndarray, biases: np.ndarray,
-               dW: np.ndarray, db: np.ndarray):
-        weights -= self.lr * dW
-        biases -= self.lr * db
+    def step(self, parameters):
+        for weights, biases, dW, db in parameters:
+            if dW is not None and db is not None:
+                weights -= self.lr * dW
+                biases -= self.lr * db
 
 
 class SGDM(Optimiser):
@@ -40,8 +38,7 @@ class SGDM(Optimiser):
         self.v_w = {}
         self.v_b = {}
 
-    def update(self, weights: np.ndarray, biases: np.ndarray,
-               dW: np.ndarray, db: np.ndarray):
+    def step(self, parameters):
         """
         Performs a momentum-based parameter update.
 
@@ -61,25 +58,29 @@ class SGDM(Optimiser):
             - γ is the momentum factor,
             - η is the learning rate.
         """
-        weights_id = id(weights)
-        biases_id = id(biases)
+        for weights, biases, dW, db in parameters:
+            if dW is None or db is None:
+                continue
 
-        if weights_id not in self.v_w:
-            self.v_w[weights_id] = np.zeros_like(weights)
-            self.v_b[biases_id] = np.zeros_like(biases)
+            weights_id = id(weights)
+            biases_id = id(biases)
 
-        # [:] for mutating the existing array instead of rebinding, updating data in place
-        self.v_w[weights_id][:] = self.gamma * self.v_w[weights_id] + self.lr * dW
-        self.v_b[biases_id][:] = self.gamma * self.v_b[biases_id] + self.lr * db
-        
-        weights -= self.v_w[weights_id]
-        biases -= self.v_b[biases_id]
+            if weights_id not in self.v_w:
+                self.v_w[weights_id] = np.zeros_like(weights)
+                self.v_b[biases_id] = np.zeros_like(biases)
+
+            # [:] for mutating the existing array instead of rebinding, updating data in place
+            self.v_w[weights_id][:] = self.gamma * self.v_w[weights_id] + self.lr * dW
+            self.v_b[biases_id][:] = self.gamma * self.v_b[biases_id] + self.lr * db
+
+            weights -= self.v_w[weights_id]
+            biases -= self.v_b[biases_id]
 
 
 class RMSProp(Optimiser):
     def __init__(self):
         pass
 
-    def update(self, weights: np.ndarray, biases: np.ndarray,
-               dW: np.ndarray, db: np.ndarray):
-        pass
+    def step(self, parameters):
+        for weights, biases, dW, db in parameters:
+            pass

@@ -1,8 +1,7 @@
 import numpy as np
 
-from core.activations import LeakyReLU, Activation
+from core.activations import Activation
 from core.initialisers import Initialiser
-from core.optimisers import Optimiser
 
 from typing import Tuple, Optional
 
@@ -38,7 +37,3 @@ class Layer:
         self.d_biases = np.sum(d_z, axis=1, keepdims=True) # axis for rows instead
         d_inputs = np.dot(self.weights.T, d_z) # dL/dx = dL/dz * dz/dx
         return d_inputs, self.d_weights, self.d_biases
-
-    def update(self, optimiser: Optimiser) -> None:
-        optimiser.update(self.weights, self.biases,
-                         self.d_weights, self.d_biases)

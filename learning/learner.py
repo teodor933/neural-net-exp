@@ -18,12 +18,15 @@ class Learner:
         self.batch_size = batch_size
 
     def learn_step(self, input_batch: np.ndarray, output_batch: np.ndarray) -> float:
-        pred, _ = self.model.forward(input_batch) # get model output
+        prediction = self.model.predict(input_batch) # get model output
 
-        loss = self.loss_fn.execute(pred, output_batch) # get loss
+        loss = self.loss_fn.execute(prediction, output_batch) # get loss
 
-        d_loss = self.loss_fn.derivative(pred, output_batch) # derivative of the loss
-        self.model.backpropagate(d_loss, self.optimiser) # iterate network
+        d_loss = self.loss_fn.derivative(prediction, output_batch) # derivative of the loss
+
+        self.model.backpropagation(d_loss) # update layer gradients using loss
+
+        self.optimiser.step(self.model.get_parameters()) # alter model parameters
 
         return loss # other use cases
 

@@ -1,5 +1,6 @@
 import numpy as np
 
+from core.layers import Dense
 from core.neural_network import NeuralNetwork
 from core.activations import LeakyReLU, Linear, Tanh, ReLU
 from core.loss_functions import MSELoss
@@ -19,10 +20,10 @@ def main():
     x_batch = ((x_batch - x_mean) / x_std)  # standard normal distribution z-score
     y_batch = y_batch
 
-    nn = NeuralNetwork(input_size=1)
-    nn.add_layer(32, LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())
-    nn.add_layer(16, LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())
-    nn.add_layer(1, Linear())
+    nn = NeuralNetwork() # lazy config
+    nn.add_layer(Dense(output_size=32, activation=LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())) # lazy config
+    nn.add_layer(Dense(output_size=16, activation=LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())) # lazy config
+    nn.add_layer(Dense(input_size=16, output_size=1, activation=Linear(), weight_initialiser=HeNormal())) # explicit config
 
     learning_rate = 0.005
 

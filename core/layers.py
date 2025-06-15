@@ -1,31 +1,66 @@
 import numpy as np
+from abc import ABC, abstractmethod
 
 from core.activations import Activation
 from core.initialisers import Initialiser
 
 from typing import Tuple, Optional
 
+class Layer(ABC):
+    def __init__(self):
+        self.weights = None
+        self.biases = None
+        self.d_weights = None
+        self.d_biases = None
+        self.built = False
 
-class Layer:
+        self.output_size = None
+
+    def build(self, input_size: int):
+        self.built = True
+
+    @abstractmethod
+    def forward(self, inputs: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    @abstractmethod
+    def backward(self, d_loss: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+class Dense(Layer):
     def __init__(self,
-                 input_size: int,
                  output_size: int,
                  activation: Activation,
-                 weight_initialiser: Initialiser = None
+                 weight_initialiser: Initialiser = None,
+                 input_size: Optional[int] = None
                  ) -> None:
-        self.weight_initialiser = weight_initialiser or getattr(activation, "weight_initialiser")
-
-        self.weights = self.weight_initialiser(input_size, output_size)
-        self.biases = np.zeros((output_size, 1))
+        super().__init__()
+        self.output_size = output_size
         self.activation = activation
+        self.weight_initialiser = weight_initialiser or getattr(activation, "weight_initialiser")
 
         self.inputs: Optional[np.ndarray] = None
         self.z: Optional[np.ndarray] = None
         self.outputs: Optional[np.ndarray] = None
+
         self.d_weights: Optional[np.ndarray] = None
         self.d_biases: Optional[np.ndarray] = None
 
+        if input_size is not None:
+            self.build(input_size)
+
+    def build(self, input_size: int) -> None:
+        if self.built:
+            return
+
+        self.weights = self.weight_initialiser(input_size, self.output_size)
+        self.biases = np.zeros((self.output_size, 1))
+        self.built = True
+
     def forward(self, inputs: np.ndarray) -> np.ndarray:
+        if not self.built:
+            raise RuntimeError("Layer has not been built yet. The method build() should be called before using the layer.")
+
         self.inputs = inputs
         self.z = np.dot(self.weights, self.inputs) + self.biases
         self.outputs = self.activation.execute(self.z)

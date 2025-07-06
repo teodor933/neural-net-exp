@@ -3,19 +3,31 @@ from abc import ABC, abstractmethod
 
 
 class Optimiser(ABC):
+    def __init__(self, learning_rate: float = 1e-4):
+        self.lr = learning_rate
+        self.model = None
+
     @abstractmethod
-    def step(self, parameters):
+    def initialise(self, model):
+        raise NotImplementedError
+
+    @abstractmethod
+    def step(self):
         raise NotImplementedError
 
 class SGD(Optimiser):
     def __init__(self, learning_rate: float = 1e-4):
-        self.lr = learning_rate
+        super().__init__(learning_rate)
+        self.model = None
 
-    def step(self, parameters):
-        for weights, biases, dW, db in parameters:
+    def initialise(self, model):
+        self.model = model
+
+    def step(self):
+        for weights, biases, dW, db in self.model.get_parameters():
             if dW is not None and db is not None:
-                weights -= self.lr * dW
-                biases -= self.lr * db
+                weights[:] -= self.lr * dW
+                biases[:] -= self.lr * db
 
 
 class SGDM(Optimiser):
@@ -32,13 +44,15 @@ class SGDM(Optimiser):
         This helps accelerate learning in consistent gradient directions and
         reduces oscillation in noisy or curved loss surfaces.
         """
-        self.lr = learning_rate
+        super().__init__(learning_rate)
         self.gamma = gamma
+        self.model = None
+        self.velocities = None
 
-        self.v_w = {}
-        self.v_b = {}
+    def initialise(self, model):
+        self.model = model
 
-    def step(self, parameters):
+    def step(self):
         """
         Performs a momentum-based parameter update.
 
@@ -58,29 +72,36 @@ class SGDM(Optimiser):
             - γ is the momentum factor,
             - η is the learning rate.
         """
-        for weights, biases, dW, db in parameters:
+
+        if self.velocities is None:
+            self.velocities = []
+            for weights, biases, _, _, in self.model.get_parameters():
+                v_w = np.zeros_like(weights)
+                v_b = np.zeros_like(biases)
+                self.velocities.append((v_w, v_b))
+
+        for i, (weights, biases, dW, db) in enumerate(self.model.get_parameters()):
             if dW is None or db is None:
                 continue
 
-            weights_id = id(weights)
-            biases_id = id(biases)
+            v_w, v_b = self.velocities[i]
 
-            if weights_id not in self.v_w:
-                self.v_w[weights_id] = np.zeros_like(weights)
-                self.v_b[biases_id] = np.zeros_like(biases)
+            # update in place
+            v_w[:] = self.gamma * v_w + self.lr * dW
+            v_b[:] = self.gamma * v_b + self.lr * db
 
-            # [:] for mutating the existing array instead of rebinding, updating data in place
-            self.v_w[weights_id][:] = self.gamma * self.v_w[weights_id] + self.lr * dW
-            self.v_b[biases_id][:] = self.gamma * self.v_b[biases_id] + self.lr * db
-
-            weights -= self.v_w[weights_id]
-            biases -= self.v_b[biases_id]
+            weights[:] -= v_w
+            biases[:] -= v_b
 
 
 class RMSProp(Optimiser):
-    def __init__(self):
-        pass
+    def __init__(self, learning_rate: float = 1e-4):
+        super().__init__(learning_rate)
+        self.params_with_grads = []
 
-    def step(self, parameters):
-        for weights, biases, dW, db in parameters:
+    def initialise(self, parameters):
+        self.params_with_grads = list(parameters)
+
+    def step(self):
+        for weights, biases, dW, db in self.params_with_grads:
             pass

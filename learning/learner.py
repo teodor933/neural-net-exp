@@ -17,6 +17,8 @@ class Learner:
         self.optimiser = optimiser
         self.batch_size = batch_size
 
+        self.optimiser.initialise(self.model)
+
     def learn_step(self, input_batch: np.ndarray, output_batch: np.ndarray) -> float:
         prediction = self.model.predict(input_batch) # get model output
 
@@ -26,7 +28,7 @@ class Learner:
 
         self.model.backpropagation(d_loss) # update layer gradients using loss
 
-        self.optimiser.step(self.model.get_parameters()) # alter model parameters
+        self.optimiser.step() # alter model parameters
 
         return loss # other use cases
 

@@ -1,56 +1,68 @@
 import numpy as np
 
-from core.layers import Dense
-from core.neural_network import NeuralNetwork
-from core.activations import LeakyReLU, Linear, Tanh, ReLU
-from core.loss_functions import MSELoss
-from core.optimisers import SGD, SGDM
-from learning.learner import Learner
-from core.initialisers import HeNormal, Normal
-
 import matplotlib.pyplot as plt
+
+from core.activation_functions.leaky_relu import LeakyReLU
+from core.activation_functions.linear import Linear
+from core.activation_functions.relu import ReLU
+from core.layers.activation import Activation
+from core.layers.dense import Dense
+from core.loss_functions.mse import MSE
+from core.models.neural_network import NeuralNetwork
+from core.optimizers.sgd import SGD
+from core.training.learner import Learner
+from core.weight_initializers.glorot_normal import GlorotNormal
+from core.weight_initializers.he_normal import HeNormal
+from core.weight_initializers.normal import Normal
+
 
 def main():
     np.random.seed(123)
 
-    x_batch = np.random.uniform(-10, 10, (1, 1000))  # (1, 1000)
-    y_batch = np.sin(x_batch)
+    input_samples = np.linspace(-1, 1, 200).reshape(-1, 1)
+    output_samples = 2*input_samples + 1
 
-    x_mean, x_std = np.mean(x_batch), np.std(x_batch)
-    x_batch = ((x_batch - x_mean) / x_std)  # standard normal distribution z-score
-    y_batch = y_batch
+    model = NeuralNetwork(input_size=1)
+    model.add_layer(Dense(16, weight_initializer=HeNormal()))
+    model.add_layer(Activation(LeakyReLU(alpha=0.1)))
+    model.add_layer(Dense(16, weight_initializer=HeNormal()))
+    model.add_layer(Activation(LeakyReLU(alpha=0.1)))
+    model.add_layer(Dense(1, weight_initializer=GlorotNormal()))
+    model.add_layer(Activation(Linear()))
 
-    nn = NeuralNetwork() # lazy config
-    nn.add_layer(Dense(output_size=32, activation=LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())) # lazy config
-    nn.add_layer(Dense(output_size=16, activation=LeakyReLU(alpha=0.01), weight_initialiser=HeNormal())) # lazy config
-    nn.add_layer(Dense(input_size=16, output_size=1, activation=Linear(), weight_initialiser=HeNormal())) # explicit config
+    model.summary()
 
-    learning_rate = 0.005
+    learner = Learner(
+        model=model,
+        loss_fn=MSE(),
+        optimizer=SGD(learning_rate=5e-3)
+    )
 
-    optimiser = SGDM(learning_rate=learning_rate, gamma=0.9)
-    learner = Learner(model=nn,
-                      loss_fn=MSELoss(),
-                      optimiser=optimiser,
-                      batch_size=50)
+    history = learner.learn(
+        input_samples=input_samples,
+        output_samples=output_samples,
+        epochs=500,
+        batch_size=100,
+        shuffle=True,
+        verbose=True
+    )
 
-    epochs = 4000
+    plt.plot(history["loss"])
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.grid(True)
+    plt.show()
 
-    training_loss = learner.learn(x_batch, y_batch,
-                                  epochs=epochs,
-                                  verbose=True)
+    x_plot = np.linspace(-2.0, 2.0, 400).reshape(-1, 1)
+    y_true = 2 * x_plot + 1
+    y_pred = learner.predict(x_plot)
 
-    x_eval = np.linspace(-10, 10, 1000).reshape(1, -1)  # Shape: (1, 1000)
-    x_eval_normalized = (x_eval - x_mean) / x_std
-    y_true = np.sin(x_eval)
-    y_pred = nn.predict(x_eval_normalized)
-
-    # Plotting
-    plt.plot(x_eval.flatten(), y_true.flatten(), label="True sin(x)", color='blue')
-    plt.plot(x_eval.flatten(), y_pred.flatten(), label="NN Prediction", color='red')
-    plt.legend()
-    plt.title("Neural Network Approximation of sin(x)")
+    plt.plot(x_plot, y_true, label="True function")
+    plt.plot(x_plot, y_pred, label="Model prediction")
     plt.xlabel("x")
     plt.ylabel("y")
+    plt.title("Model Predictions")
+    plt.legend()
     plt.grid(True)
     plt.show()
 

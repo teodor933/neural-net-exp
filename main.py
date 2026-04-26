@@ -35,7 +35,7 @@ def main():
     learner = Learner(
         model=model,
         loss_fn=MSE(),
-        optimizer=SGD(learning_rate=5e-3)
+        optimizer=SGD(learning_rate=5e-3, momentum=0.99)
     )
 
     history = learner.learn(

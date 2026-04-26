@@ -8,4 +8,4 @@ class Normal(WeightInitializer):
         self.scale = scale
 
     def __call__(self, input_size: int, output_size: int) -> np.ndarray:
-        return np.random.randn(input_size, output_size) * self.scale
+        return (np.random.randn(input_size, output_size) * self.scale).astype(np.float32)

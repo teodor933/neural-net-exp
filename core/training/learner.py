@@ -22,6 +22,7 @@ class Learner:
         loss = self.loss_fn.execute(predictions, output_batch)
         d_loss = self.loss_fn.derivative(predictions, output_batch)
 
+        self.model.zero_gradient()
         self.model.backward(d_loss)
         self.optimizer.step()
 

@@ -6,4 +6,4 @@ from core.weight_initializers.weight_initializer import WeightInitializer
 class HeNormal(WeightInitializer):
     def __call__(self, input_size: int, output_size: int) -> np.ndarray:
         scale = np.sqrt(2.0 / input_size)
-        return np.random.randn(input_size, output_size) * scale
+        return (np.random.randn(input_size, output_size) * scale).astype(np.float32)

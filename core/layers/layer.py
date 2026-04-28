@@ -8,6 +8,7 @@ from core.parameters import Parameter
 class Layer(ABC):
     def __init__(self) -> None:
         self.built = False
+        self.training = True
 
         self.input_size: int | None = None
         self.output_size: int | None = None
@@ -21,6 +22,12 @@ class Layer(ABC):
         self.input_size = input_size
         self.output_size = input_size
         self.built = True
+
+    def train(self) -> None:
+        self.training = True
+
+    def eval(self) -> None:
+        self.training = False
 
     def parameters(self) -> list[Parameter]:
         return self._parameters

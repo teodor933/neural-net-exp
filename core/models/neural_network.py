@@ -43,7 +43,27 @@ class NeuralNetwork:
             parameter.zero_gradient()
 
     def predict(self, inputs: np.ndarray) -> np.ndarray:
-        return self.forward(inputs)
+        previous_modes = [layer.training for layer in self.layers]
+
+        self.eval()
+        predictions = self.forward(inputs)
+
+        # Switch back if needed to training mode
+        for layer, was_training in zip(self.layers, previous_modes):
+            if was_training:
+                layer.train()
+            else:
+                layer.eval()
+
+        return predictions
+
+    def train(self) -> None:
+        for layer in self.layers:
+            layer.train()
+
+    def eval(self) -> None:
+        for layer in self.layers:
+            layer.eval()
 
     def summary(self) -> None:
         print("=== MODEL SUMMARY ===")

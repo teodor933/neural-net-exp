@@ -2,11 +2,13 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
+from core.activation_functions.elu import ELU
 from core.activation_functions.leaky_relu import LeakyReLU
 from core.activation_functions.linear import Linear
 from core.activation_functions.relu import ReLU
 from core.layers.activation import Activation
 from core.layers.dense import Dense
+from core.layers.dropout import Dropout
 from core.loss_functions.mse import MSE
 from core.models.neural_network import NeuralNetwork
 from core.optimizers.sgd import SGD

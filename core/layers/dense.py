@@ -47,6 +47,7 @@ class Dense(Layer):
             raise RuntimeError("Dense layer was not built correctly.")
 
         self.inputs = inputs
+        print(self.inputs.shape, self.weights.shape, self.biases.data.shape)
         self.outputs = inputs @ self.weights.data + self.biases.data
         return self.outputs
 

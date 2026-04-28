@@ -25,4 +25,4 @@ class Activation(Layer):
     def backward(self, d_loss: np.ndarray) -> np.ndarray:
         if self.inputs is None:
             raise RuntimeError("Cannot call backward() on Activation before forward().")
-        return d_loss * self.activation_fn.derivative(self.inputs) # dL/dz = dL/da * da/dz
+        return self.activation_fn.backward(self.inputs, d_loss) # dL/dz = dL/da * da/dz

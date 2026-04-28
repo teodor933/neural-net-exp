@@ -18,7 +18,8 @@ class Learner:
         self.optimizer.initialize(model)
 
     def learn_step(self, input_batch: np.ndarray, output_batch: np.ndarray) -> float:
-        predictions = self.model.predict(input_batch)
+        self.model.train()
+        predictions = self.model.forward(input_batch)
         loss = self.loss_fn.execute(predictions, output_batch)
         d_loss = self.loss_fn.derivative(predictions, output_batch)
 
@@ -82,7 +83,7 @@ class Learner:
 
             if verbose:
                 if epoch == 0 or (epoch + 1) % max(1, epochs // 10) == 0 or epoch == epochs - 1:
-                    print(f"Epoch {epoch + 1}/{epochs} - loss: {epoch_loss:.6f}")
+                    print(f"Epoch {epoch + 1}/{epochs} - loss: {epoch_loss:.9f}")
 
         return history
 
